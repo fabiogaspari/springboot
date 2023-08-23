@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Promoções - Listar</title>
+<th:block th:include="layout.html :: headerfiles"></th:block>
+</head>
+<body>
+    <th:block th:include="layout.html :: header"></th:block>
+    <div class="mt-10 mx-auto container">
+        <table class="table-auto w-full">
+            <thead>
+            <tr>
+                <th class="text-left">Nome</th>
+                <th class="text-left">Descrição</th>
+                <th class="text-left">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="promocao : ${promocoes}">
+                <td th:text="${promocao.nmPromocao}"></td>
+                <td th:text="${promocao.dsPromocao}"></td>
+                <td>
+                    <a th:href="@{'/promocoes/' + ${promocao.idPromocao}}">Visualizar</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <th:block th:include="layout.html :: footer"></th:block>
+</body>
+</html>
