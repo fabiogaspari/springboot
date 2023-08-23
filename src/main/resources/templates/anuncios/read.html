@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<title>Promoções - Listar</title>
+<title>Anuncios - Visualizar</title>
 <th:block th:include="layout.html :: headerfiles"></th:block>
 </head>
 <body>
@@ -22,12 +22,26 @@
                 <td th:text="${anuncio.promocao.nmPromocao}"></td>
                 <td th:text="${anuncio.stAnuncio} ? 'ATIVO' : 'INATIVO'"></td>
                 <td>
-                    <a th:onclick="removerAnuncio()">Remover</a>
+                    <a th:onclick="|removerAnuncio(${anuncio.idAnuncio})|">Remover</a>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
+    <script th:inline="javascript">
+        function removerAnuncio(id) {
+            confirm("Deseja realmente remover esse anuncio",
+                axios.delete("/anuncios/"+id)
+                    .then((res) => {
+                        alert("Sucesso ao excluir o registro.");
+                        location.reload();
+                    })
+                    .catch((err) => {
+                        alert("Erro ao excluir o registro.");
+                    })
+            );
+        }
+    </script>
     <th:block th:include="layout.html :: footer"></th:block>
 </body>
 </html>

@@ -2,6 +2,7 @@ package com.anunciospromocoes.springboot.anuncios;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,42 +28,73 @@ public class AnuncioController {
 
     @GetMapping
     public String all(Model model) {
-        List<Anuncio> anuncios = anuncioRepository.findAll();
-        
-        model.addAttribute("anuncios", anuncios);
+        List<Anuncio> anuncio = anuncioRepository.findAll();
 
-        return "anuncios/index";
-    }
-
-    @GetMapping(path = "/{id}")
-    public String get(@PathVariable("id") int anuncioId, Model model) {
-        Anuncio anuncio = anuncioRepository.findById(anuncioId)
-            .orElseThrow(() -> new NoSuchElementException("Anuncio de id " + anuncioId + " não encontrado"));
-                    
         model.addAttribute("anuncio", anuncio);
 
-        return "anuncios/read";
+        return "anuncio/index";
     }
 
-    @PostMapping(produces = "application/json")
-    public @ResponseBody Anuncio create(@RequestBody @Valid Anuncio anuncio) {
-        return anuncioRepository.save(anuncio);
+    @GetMapping("/{id}")
+    public String get(@PathVariable("id") int promocaoId, Model model) {
+        Anuncio anuncio = anuncioRepository.findById(promocaoId)
+            .orElseThrow(() -> new NoSuchElementException("Anuncio de id " + promocaoId + " não encontrado"));
+        
+        model.addAttribute("anuncio", anuncio);
+
+        return "anuncio/read";
     }
 
-    @PutMapping
-    public Anuncio update(@RequestBody @Valid Anuncio anuncio) {
+    @GetMapping("/cadastrar")
+    public String createForm(Model model) {
+        model.addAttribute("anuncio", new Anuncio());
+        return "anuncio/insert";
+    }
+
+    @PostMapping
+    public String post(Anuncio anuncio) {
+        Optional<Anuncio> findedAnuncio = anuncioRepository.findById(anuncio.getIdAnuncio());
+        Anuncio savedAnuncio = null;
+
+        if (  findedAnuncio.isPresent() ) {
+            savedAnuncio = findedAnuncio.get();
+            savedAnuncio.setDsAnuncio(anuncio.getDsAnuncio());
+            savedAnuncio.setStAnuncio(anuncio.getStAnuncio());
+            savedAnuncio.setPromocao(anuncio.getPromocao());
+            savedAnuncio = anuncioRepository.save(savedAnuncio);
+        } else {
+            savedAnuncio = anuncioRepository.save(anuncio);
+        }
+         
+        return "redirect:/anuncio/"+savedAnuncio.getIdAnuncio();
+    }
+
+    @GetMapping("/atualizar/{id}")
+    public String updateForm(@PathVariable("id") int promocaoId, Model model) {
+        Anuncio anuncio = anuncioRepository.findById(promocaoId)
+            .orElseThrow(() -> new NoSuchElementException("Anuncio de id " + promocaoId + " não encontrado"));;
+        
+        model.addAttribute("anuncio", anuncio);
+        
+        return "anuncio/update";
+    }
+
+    @PutMapping("/{idPromocao}")
+    public String update(@PathVariable("idPromocao") int promocaoId, Anuncio anuncio) {
         Anuncio findedAnuncio = anuncioRepository.findById(anuncio.getIdAnuncio())
             .orElseThrow(() -> new NoSuchElementException("Anuncio de id " + anuncio.getIdAnuncio() + " não encontrado"));
     
         findedAnuncio.setDsAnuncio(anuncio.getDsAnuncio());
-        findedAnuncio.setPromocao(anuncio.getPromocao());
         findedAnuncio.setStAnuncio(anuncio.getStAnuncio());
+        findedAnuncio.setPromocao(anuncio.getPromocao());
 
-        return anuncioRepository.save(findedAnuncio);
+        findedAnuncio = anuncioRepository.save(findedAnuncio);
+
+        return "redirect:/anuncio/"+findedAnuncio.getIdAnuncio();
     }
 
-    @DeleteMapping(path = "/{id}")
-    public void delete(@PathVariable("id") int idAnuncio) {
-        anuncioRepository.deleteById(idAnuncio);
+    @DeleteMapping(path = "/{id}", produces = "application/json")
+    public @ResponseBody void delete(@PathVariable("id") int idPromocao) {
+        anuncioRepository.deleteById(idPromocao);
     }
 }

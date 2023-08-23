@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.hibernate.engine.jdbc.env.internal.LobCreationLogging_.logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,14 +52,36 @@ public class PromocaoController {
     }
 
     @PostMapping
-    public String create(@RequestBody @Valid Promocao promocao) {
-        Promocao savedPromocao = promocaoRepository.save(promocao);
-        System.out.println("entrando");
+    public String post(Promocao promocao) {
+        Optional<Promocao> findedPromocao = promocaoRepository.findById(promocao.getIdPromocao());
+        Promocao savedPromocao = null;
+
+        if (  findedPromocao.isPresent() ) {
+            savedPromocao = findedPromocao.get();
+            savedPromocao.setAnuncios(promocao.getAnuncios());
+            savedPromocao.setDsPromocao(promocao.getDsPromocao());
+            savedPromocao.setNmPromocao(promocao.getNmPromocao());
+            savedPromocao.setStPromocao(promocao.getStPromocao());
+            savedPromocao = promocaoRepository.save(savedPromocao);
+        } else {
+            savedPromocao = promocaoRepository.save(promocao);
+        }
+         
         return "redirect:/promocoes/"+savedPromocao.getIdPromocao();
     }
 
-    @PutMapping
-    public Promocao update(@RequestBody @Valid Promocao promocao) {
+    @GetMapping("/atualizar/{id}")
+    public String updateForm(@PathVariable("id") int promocaoId, Model model) {
+        Promocao promocao = promocaoRepository.findById(promocaoId)
+            .orElseThrow(() -> new NoSuchElementException("Promoção de id " + promocaoId + " não encontrado"));;
+        
+        model.addAttribute("promocao", promocao);
+        
+        return "promocoes/update";
+    }
+
+    @PutMapping("/{idPromocao}")
+    public String update(@PathVariable("idPromocao") int promocaoId, Promocao promocao) {
         Promocao findedPromocao = promocaoRepository.findById(promocao.getIdPromocao())
             .orElseThrow(() -> new NoSuchElementException("Promoção de id " + promocao.getIdPromocao() + " não encontrado"));
     
@@ -69,7 +90,9 @@ public class PromocaoController {
         findedPromocao.setAnuncios(promocao.getAnuncios());
         findedPromocao.setStPromocao(promocao.getStPromocao());
 
-        return promocaoRepository.save(findedPromocao);
+        findedPromocao = promocaoRepository.save(findedPromocao);
+
+        return "redirect:/promocoes/"+findedPromocao.getIdPromocao();
     }
 
     @DeleteMapping(path = "/{id}", produces = "application/json")

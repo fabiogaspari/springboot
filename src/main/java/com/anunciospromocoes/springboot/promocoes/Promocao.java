@@ -5,6 +5,7 @@ import java.util.List;
 import com.anunciospromocoes.springboot.anuncios.Anuncio;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,7 +30,7 @@ public class Promocao {
     @Column(nullable = false)
     private Boolean stPromocao;
 
-    @OneToMany(orphanRemoval = true, mappedBy = "promocao")
+    @OneToMany(mappedBy = "promocao", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Anuncio> anuncios;
 
